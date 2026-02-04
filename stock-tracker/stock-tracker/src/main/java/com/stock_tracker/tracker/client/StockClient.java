@@ -2,6 +2,7 @@ package com.stock_tracker.tracker.client;
 
 
 import com.stock_tracker.tracker.dto.AlphaVantageResponse;
+import com.stock_tracker.tracker.dto.StockHistoryResponse;
 import com.stock_tracker.tracker.dto.StockOverviewResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +38,18 @@ public class StockClient {
                         .build())
                 .retrieve()
                 .bodyToMono(StockOverviewResponse.class)
+                .block();
+    }
+
+    public StockHistoryResponse getStockHistory(String symbol) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("function", "TIME_SERIES_DAILY")
+                        .queryParam("symbol", symbol)
+                        .queryParam("apikey", apiKey)
+                        .build())
+                .retrieve()
+                .bodyToMono(StockHistoryResponse.class)
                 .block();
     }
 

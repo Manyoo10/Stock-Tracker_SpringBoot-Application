@@ -2,15 +2,15 @@ package com.stock_tracker.tracker.service;
 
 
 import com.stock_tracker.tracker.client.StockClient;
-import com.stock_tracker.tracker.dto.AlphaVantageResponse;
-import com.stock_tracker.tracker.dto.StockOverviewResponse;
-import com.stock_tracker.tracker.dto.StockResponse;
+import com.stock_tracker.tracker.dto.*;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class StockService {
 
-    private StockClient stockClient;
+    private final StockClient stockClient;
 
     public StockService(final StockClient stockClient) {
         this.stockClient = stockClient;
@@ -27,6 +27,10 @@ public class StockService {
 
     public StockOverviewResponse getStockOverviewForSymbol(final String symbol) {
         return stockClient.getStockOverview(symbol);
+    }
+
+    public List<DailyStockResponse> getHistory (String symbol, int days) {
+        StockHistoryResponse response = stockClient.getStockHistory(symbol);
     }
 }
 
