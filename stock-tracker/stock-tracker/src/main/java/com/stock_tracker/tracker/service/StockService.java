@@ -3,6 +3,8 @@ package com.stock_tracker.tracker.service;
 
 import com.stock_tracker.tracker.client.StockClient;
 import com.stock_tracker.tracker.dto.*;
+import com.stock_tracker.tracker.entity.FavoriteStock;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,8 +52,9 @@ public class StockService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public FavoriteStock addFavorite(final String symbol) {
-
+        if
     }
 }
 
