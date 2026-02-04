@@ -31,3 +31,57 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+logs/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Build ###
+/target/
+/build/
+
+### Java / IDE ###
+*.class
+*.jar
+*.war
+*.ear
+.classpath
+.project
+.settings/
+*.iml
+
+### Environment & secrets ###
+# Environment files
+.env
+.env.*
+
+# Application config that may contain secrets
+src/main/resources/application.properties
+application.properties
+application-*.properties
+
+# Secret and key files
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+*.csr
+
+### Databases ###
+*.db
+*.mv.db
+*.h2.db
+
+### Keystore / certificate stores ###
+keystore.jks
+
+### Local Maven settings (may contain credentials) ###
+settings.xml
+

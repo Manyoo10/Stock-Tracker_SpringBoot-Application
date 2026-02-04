@@ -6,6 +6,7 @@ import com.stock_tracker.tracker.dto.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StockService {
@@ -31,6 +32,26 @@ public class StockService {
 
     public List<DailyStockResponse> getHistory (String symbol, int days) {
         StockHistoryResponse response = stockClient.getStockHistory(symbol);
+
+        return response.timeSeries().entrySet().stream()
+                .limit(days)
+                .map(entry -> {
+                    var date = entry.getKey();
+                    var daily = entry.getValue();
+                    return  new DailyStockResponse(
+                            date,
+                            Double.parseDouble(daily.open()),
+                            Double.parseDouble(daily.close()),
+                            Double.parseDouble(daily.high()),
+                            Double.parseDouble(daily.low()),
+                            Long.parseLong(daily.volume())
+                    );
+                } )
+                .collect(Collectors.toList());
+    }
+
+    public FavoriteStock addFavorite(final String symbol) {
+
     }
 }
 

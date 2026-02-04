@@ -2,10 +2,12 @@ package com.stock_tracker.tracker.controller;
 
 
 import com.stock_tracker.tracker.dto.DailyStockResponse;
+import com.stock_tracker.tracker.dto.FavoriteStockRequest;
 import com.stock_tracker.tracker.dto.StockOverviewResponse;
 import com.stock_tracker.tracker.dto.StockResponse;
 import com.stock_tracker.tracker.service.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,5 +40,12 @@ public class StockController {
     ){
         return stockService.getHistory(symbol.toUpperCase(), days);
     }
+
+    @PostMapping("/favorites")
+    public ResponseEntity<FavoriteStock> saveFavoriteStock(@RequestBody FavoriteStockRequest request) {
+        final FavoriteStock saved = stockService.addFavorite(request.getSymbol());
+        return ResponseEntity.ok(saved);
+    }
+
 
 }
