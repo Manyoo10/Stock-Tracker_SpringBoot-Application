@@ -73,7 +73,7 @@ public class StockService {
         return favoritesRepository.save(favorite);
     }
 
-    public List<StockResponse> getFavouritesWithLivePrices() {
+    public List<StockResponse> getFavoritesWithLivePrices() {
         List<FavoriteStock> favorites = favoritesRepository.findAll();
 
         return favorites.stream()
