@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class StockService {
 
     private final StockClient stockClient;
-    private FavoriteStockRepository favoritesRepository;
+    private final FavoriteStockRepository favoritesRepository;
 
     public StockService(final StockClient stockClient,
                         final FavoriteStockRepository favoritesRepository) {

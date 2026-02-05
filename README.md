@@ -22,10 +22,20 @@ from the Alpha Vantage API and exposes a simple REST API.
 ## Configuration
 The application expects the following application properties (see `stock-tracker/stock-tracker/src/main/resources/application.properties`):
 
+### Required API Configuration
 - `alpha.vantage.api.key` — your Alpha Vantage API key (required)
-- `alpha.vantage.url` — base URL for Alpha Vantage (recommended value: `https://www.alphavantage.co/query`)
+- `alpha.vantage.base.url` — base URL for Alpha Vantage (default: `https://www.alphavantage.co/query?`)
 
-Note: `WebClientConfig` reads the property `alpha.vantage.url`. The provided `application.properties` currently contains `alpha.vantage.base.url`; update that key to `alpha.vantage.url` or change the config accordingly.
+### Database Configuration (H2)
+- `spring.datasource.url` — H2 database file location (default: `jdbc:h2:file:../data/stockdb`)
+- `spring.jpa.hibernate.ddl-auto` — set to `update` for automatic schema creation
+- `spring.h2.console.enable` — set to `true` to enable H2 web console
+- `spring.h2.console.path` — H2 console path (default: `/h2-console`)
+
+### Caching
+- `spring.cache.type` — set to `simple` for in-memory caching
+
+The application uses **H2 database** for persisting favorite stocks. The database file is stored at `../data/stockdb` (relative to the `stock-tracker/stock-tracker` folder).
 
 ## Build and run (Windows)
 Open a terminal in `stock-tracker/stock-tracker` and run:
@@ -45,30 +55,73 @@ java -jar target\stock-tracker-0.0.1-SNAPSHOT.jar
 ## REST API
 Base path: `/api/v1/stocks`
 
-- Get latest quote
-	- `GET /api/v1/stocks/{symbol}`
-	- Example: `GET /api/v1/stocks/IBM`
+### Stock Data Endpoints
+- **Get latest quote**
+  - `GET /api/v1/stocks/{symbol}`
+  - Example: `GET /api/v1/stocks/IBM`
+  - Returns: Current price, last trading day, and symbol
+  - Note: Results are cached for improved performance
 
-- Get company overview
-	- `GET /api/v1/stocks/{symbol}/overview`
-	- Example: `GET /api/v1/stocks/IBM/overview`
+- **Get company overview**
+  - `GET /api/v1/stocks/{symbol}/overview`
+  - Example: `GET /api/v1/stocks/IBM/overview`
+  - Returns: Company information including industry, market cap, P/E ratio, etc.
 
-- Get historical daily prices
-	- `GET /api/v1/stocks/{symbol}/history?days=30`
-	- Query param `days` is optional (default: 30)
+- **Get historical daily prices**
+  - `GET /api/v1/stocks/{symbol}/history?days=30`
+  - Query param `days` is optional (default: 30)
+  - Example: `GET /api/v1/stocks/IBM/history?days=60`
+  - Returns: Daily OHLCV data (Open, High, Low, Close, Volume) for the specified number of days
 
-Example curl (replace `<API_HOST>` and `<SYMBOL>` as appropriate):
+### Favorites Management Endpoints
+- **Add a stock to favorites**
+  - `POST /api/v1/stocks/favorites`
+  - Request body: `{"symbol": "IBM"}`
+  - Returns: The saved favorite stock entry
+  - Note: Attempting to add a duplicate favorite will throw a `FavoriteAlreadyExistsException`
+
+- **Get all favorites with live prices**
+  - `GET /api/v1/stocks/favorites`
+  - Returns: List of all favorite stocks with current prices
+  - Note: Uses cached price data for performance
+
+### Example REST Calls
 
 ```bash
+# Get latest quote
 curl http://localhost:8080/api/v1/stocks/IBM
+
+# Get company overview
 curl http://localhost:8080/api/v1/stocks/IBM/overview
+
+# Get historical daily prices (last 60 days)
 curl "http://localhost:8080/api/v1/stocks/IBM/history?days=60"
+
+# Add a stock to favorites
+curl -X POST http://localhost:8080/api/v1/stocks/favorites \
+  -H "Content-Type: application/json" \
+  -d '{"symbol": "AAPL"}'
+
+# Get all favorite stocks with live prices
+curl http://localhost:8080/api/v1/stocks/favorites
 ```
 
-## Notes & Known Issues
+## Database
+The application uses **H2 database** to persist favorite stocks:
+- Database is stored at `../data/stockdb` (file-based)
+- Automatic schema creation is enabled via `spring.jpa.hibernate.ddl-auto=update`
+- The `favorite_stocks` table stores symbol and ID
+- Access the H2 web console at `http://localhost:8080/h2-console` (when enabled)
+
+## Caching
+- Stock quotes are cached in-memory to reduce API calls to Alpha Vantage
+- Cache type: `simple` (Spring's built-in in-memory cache)
+- Cached data improves response time for repeated requests
+
+## Notes
 - The application uses the Alpha Vantage API. Obtain a (free) API key at https://www.alphavantage.co/support/#api-key and set `alpha.vantage.api.key` in `application.properties`.
-- `WebClientConfig` currently expects the property name `alpha.vantage.url` — update `application.properties` to match.
-- `StockService.getHistory` appears incomplete and may require finishing to return a list of `DailyStockResponse` objects.
+- Favorite stocks are stored in a persistent H2 database.
+- Attempting to add a duplicate favorite stock will throw a `FavoriteAlreadyExistsException`.
 
 ## Tests
 Run unit tests with:
