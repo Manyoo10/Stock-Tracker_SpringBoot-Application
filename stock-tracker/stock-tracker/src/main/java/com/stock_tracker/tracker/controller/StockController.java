@@ -5,6 +5,7 @@ import com.stock_tracker.tracker.dto.DailyStockResponse;
 import com.stock_tracker.tracker.dto.FavoriteStockRequest;
 import com.stock_tracker.tracker.dto.StockOverviewResponse;
 import com.stock_tracker.tracker.dto.StockResponse;
+import com.stock_tracker.tracker.entity.FavoriteStock;
 import com.stock_tracker.tracker.service.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,11 @@ public class StockController {
     public ResponseEntity<FavoriteStock> saveFavoriteStock(@RequestBody FavoriteStockRequest request) {
         final FavoriteStock saved = stockService.addFavorite(request.getSymbol());
         return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/favorites")
+    public List<StockResponse>getFavoritesWithPrices() {
+        return stockService.getFavoritesWithLivePrices();
     }
 
 

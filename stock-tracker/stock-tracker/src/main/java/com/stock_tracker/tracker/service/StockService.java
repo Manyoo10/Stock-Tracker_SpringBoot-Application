@@ -4,7 +4,10 @@ package com.stock_tracker.tracker.service;
 import com.stock_tracker.tracker.client.StockClient;
 import com.stock_tracker.tracker.dto.*;
 import com.stock_tracker.tracker.entity.FavoriteStock;
+import com.stock_tracker.tracker.exception.FavoriteAlreadyExistsException;
+import com.stock_tracker.tracker.repository.FavoriteStockRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +17,16 @@ import java.util.stream.Collectors;
 public class StockService {
 
     private final StockClient stockClient;
+    private FavoriteStockRepository favoritesRepository;
 
-    public StockService(final StockClient stockClient) {
+    public StockService(final StockClient stockClient,
+                        final FavoriteStockRepository favoritesRepository) {
         this.stockClient = stockClient;
+        this.favoritesRepository = favoritesRepository;
     }
 
+
+    @Cacheable(value = "stocks", key = "#stockSymbol")
     public StockResponse getStockForSymbol(final String stockSymbol) {
         final AlphaVantageResponse response = stockClient.getStockQuote(stockSymbol);
         return StockResponse.builder()
@@ -54,7 +62,24 @@ public class StockService {
 
     @Transactional
     public FavoriteStock addFavorite(final String symbol) {
-        if
+        if(favoritesRepository.existsBySymbol(symbol)){
+            throw new FavoriteAlreadyExistsException(symbol);
+        }
+
+        FavoriteStock favorite = FavoriteStock.builder()
+                .symbol(symbol)
+                .build();
+
+        return favoritesRepository.save(favorite);
     }
+
+    public List<StockResponse> getFavouritesWithLivePrices() {
+        List<FavoriteStock> favorites = favoritesRepository.findAll();
+
+        return favorites.stream()
+                .map(fav -> getStockForSymbol(fav.getSymbol()))
+                .collect(Collectors.toList());
+    }
+
 }
 
